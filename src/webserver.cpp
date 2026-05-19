@@ -446,14 +446,14 @@ static void handleOtaUpload() {
             logMessageFmt("info", "OTA upload: %s", upload.filename.c_str());
         } else {
             char errBuf[128];
-            snprintf(errBuf, sizeof(errBuf), "OTA begin failed: %s — partition table mismatch? Reflash via serial.", OTA_ERROR_STRING().c_str());
+            snprintf(errBuf, sizeof(errBuf), "OTA begin failed: %s — partition table mismatch? Reflash via serial.", OTA_ERROR_STRING());
             logMessageFmt("error", "%s", errBuf);
         }
     } else if (upload.status == UPLOAD_FILE_WRITE) {
         if (!otaBeginOk) return;
         if (Update.write(upload.buf, upload.currentSize) != upload.currentSize) {
             char errBuf[128];
-            snprintf(errBuf, sizeof(errBuf), "OTA write error: %s", OTA_ERROR_STRING().c_str());
+            snprintf(errBuf, sizeof(errBuf), "OTA write error: %s", OTA_ERROR_STRING());
             logMessageFmt("error", "%s", errBuf);
         }
     } else if (upload.status == UPLOAD_FILE_END) {
@@ -462,7 +462,7 @@ static void handleOtaUpload() {
             logMessageFmt("info", "OTA upload complete: %d bytes", upload.totalSize);
         else {
             char errBuf[128];
-            snprintf(errBuf, sizeof(errBuf), "OTA end failed: %s", OTA_ERROR_STRING().c_str());
+            snprintf(errBuf, sizeof(errBuf), "OTA end failed: %s", OTA_ERROR_STRING());
             logMessageFmt("error", "%s", errBuf);
         }
     }

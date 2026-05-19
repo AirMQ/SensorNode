@@ -4,7 +4,7 @@
 #ifdef ESP8266
 #  include "compat_esp8266.h"
 #  include <ESP8266WiFi.h>
-#  define OTA_ERROR_STRING()  Update.getErrorString()
+#  define OTA_ERROR_STRING()  Update.getErrorString().c_str()
 #  define OTA_BEGIN(size)     Update.begin(size)
 #  include <ESP8266WebServer.h>
 #  include <WiFiClientSecure.h>    // BearSSL::WiFiClientSecure
