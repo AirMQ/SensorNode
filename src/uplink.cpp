@@ -393,7 +393,6 @@ static String exportProvisioningConfig() {
     HwConfig hw;
     loadHwConfig(hw);
     doc["provisioned"] = hw.provisioned;
-    doc["interval"]    = hw.intervalSec;
     doc["i2c_sda"]     = hw.i2c_sda;
     doc["i2c_scl"]     = hw.i2c_scl;
     doc["uart_rx"]     = hw.uart_rx;
@@ -443,7 +442,6 @@ static void handleProvisioningConfig(const char* payload) {
         broadcastOnTime(hw.onTime);
         hwChanged = true;
     }
-    if (!doc["interval"].isNull()) { hw.intervalSec = doc["interval"].as<uint16_t>(); hwChanged = true; }
     if (!doc["i2c_sda"].isNull())  { hw.i2c_sda  = doc["i2c_sda"].as<int8_t>();  hwChanged = true; }
     if (!doc["i2c_scl"].isNull())  { hw.i2c_scl  = doc["i2c_scl"].as<int8_t>();  hwChanged = true; }
     if (!doc["uart_rx"].isNull())  { hw.uart_rx  = doc["uart_rx"].as<int8_t>();   hwChanged = true; }
@@ -475,7 +473,6 @@ static void handleProvisioningConfig(const char* payload) {
         if (!doc["teleIntervalM"].isNull()) logMessageFmt("=", "teleIntervalM=%d", hw.teleIntervalM);
         if (!doc["sampleNum"].isNull())     logMessageFmt("=", "sampleNum=%d", hw.sampleNum);
         if (!doc["onTime"].isNull())        logMessageFmt("=", "onTime=%d", hw.onTime);
-        if (!doc["interval"].isNull())      logMessageFmt("=", "interval=%d", hw.intervalSec);
         if (!doc["i2c_sda"].isNull())       logMessageFmt("=", "sda=%d", hw.i2c_sda);
         if (!doc["i2c_scl"].isNull())       logMessageFmt("=", "scl=%d", hw.i2c_scl);
         if (!doc["uart_rx"].isNull())       logMessageFmt("=", "rx=%d", hw.uart_rx);

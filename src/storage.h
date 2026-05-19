@@ -32,7 +32,6 @@ struct HwConfig {
     int8_t gpio_pin[GPIO_CTRL_MAX];
     char   gpio_mode[GPIO_CTRL_MAX][8];  // "follow", "invert", "on", "off"
     uint8_t gpio_count;
-    uint16_t intervalSec;
     // Operational params — persisted so they survive reboots
     uint16_t teleIntervalM;
     int8_t   sampleNum;

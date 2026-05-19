@@ -254,7 +254,6 @@ bool loadHwConfig(HwConfig& cfg) {
     cfg.pin5v        = DEFAULT_5V_PIN;
     for (uint8_t i = 0; i < HwConfig::GPIO_CTRL_MAX; i++) cfg.gpio_pin[i] = -1;
     cfg.gpio_count = 0;
-    cfg.intervalSec  = 60;
     cfg.teleIntervalM = DEFAULT_TELE_INTERVAL_M;
     cfg.sampleNum    = DEFAULT_SAMPLE_NUM;
     cfg.onTime       = 30;
@@ -282,7 +281,6 @@ bool loadHwConfig(HwConfig& cfg) {
         cfg.gpio_mode[cfg.gpio_count][7] = '\0';
         cfg.gpio_count++;
     }
-    if (!doc["interval"].isNull())      cfg.intervalSec  = doc["interval"].as<uint16_t>();
     if (!doc["teleIntervalM"].isNull()) cfg.teleIntervalM = doc["teleIntervalM"].as<uint16_t>();
     if (!doc["sampleNum"].isNull())     cfg.sampleNum    = doc["sampleNum"].as<int8_t>();
     if (!doc["onTime"].isNull()) {
@@ -311,7 +309,6 @@ bool saveHwConfig(const HwConfig& cfg) {
         snprintf(key, sizeof(key), "gpio%d", cfg.gpio_pin[i]);
         doc[key] = cfg.gpio_mode[i];
     }
-    doc["interval"]      = cfg.intervalSec;
     doc["teleIntervalM"] = cfg.teleIntervalM;
     doc["sampleNum"]     = cfg.sampleNum;
     doc["onTime"]        = cfg.onTime;
