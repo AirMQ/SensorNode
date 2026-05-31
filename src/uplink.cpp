@@ -981,10 +981,10 @@ static void processConnectedLoop() {
         s_sensorsStarted = true;
         if (getDeepSleepMode() && !getMaintenanceMode()) {
             logMessageFmt("debug", "Startup window: deep sleep mode — onTime=%ds, interval=%dm", STATE_GET(onTime), STATE_GET(teleIntervalM));
-            sensorsEnableDeepSleep();
+            sensorsEnableDeepSleep(true);
         } else {
             logMessageFmt("debug", "Startup window: normal mode%s", (getDeepSleepMode() ? " (maintenance override)" : ""));
-            sensorsEnable();
+            sensorsEnableDeepSleep(false);
         }
     }
 

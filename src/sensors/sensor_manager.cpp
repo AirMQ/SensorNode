@@ -184,7 +184,7 @@ static void gpiosOff() {
     }
 }
 
-void sensorsEnable() {
+void sensorsEnableDeepSleep(bool DeepSleep) {
     if (s_enabled) return;
     s_enabled = true;
     // Backdate s_lastRead so the first read fires after onTime seconds,
@@ -192,23 +192,16 @@ void sensorsEnable() {
     uint16_t onTimeSec  = STATE_GET(onTime);
     uint32_t intervalMs = (uint32_t)STATE_GET(teleIntervalM) * 60000UL;
     if (intervalMs == 0) intervalMs = 60000UL;
-    uint32_t readDelayMs = (uint32_t)onTimeSec * 1000UL;
-    s_lastRead = millis() - intervalMs + readDelayMs;
-    logMessageFmt("info", "Sensors enabled — first read in %ds", onTimeSec);
-}
-
-void sensorsEnableDeepSleep() {
-    if (s_enabled) return;
-    s_enabled = true;
-    // Schedule first read at (onTime + 5) seconds from now so PMS7003 has
-    // exactly onTime seconds to warm up before doSensorRead() fires.
-    // We backdate s_lastRead so the interval timer expires at the right moment.
-    uint16_t onTimeSec  = STATE_GET(onTime);
-    uint32_t intervalMs = (uint32_t)STATE_GET(teleIntervalM) * 60000UL;
-    if (intervalMs == 0) intervalMs = 60000UL;
-    uint32_t readDelayMs = ((uint32_t)onTimeSec + 5UL) * 1000UL;
-    s_lastRead = millis() - intervalMs + readDelayMs;
-    logMessageFmt("info", "Sensors enabled (deep sleep — read in %ds)", onTimeSec + 5);
+    s_lastRead = millis() - intervalMs + (uint32_t)onTimeSec * 1000UL;
+    if (!DeepSleep)
+        logMessageFmt("info", "Sensors enabled — first read in %ds", onTimeSec);
+    else {
+        // Schedule first read at (onTime + 5) seconds from now so PMS7003 has
+        // exactly onTime seconds to warm up before doSensorRead() fires.
+        // We backdate s_lastRead so the interval timer expires at the right moment.
+        s_lastRead = s_lastRead + 5000UL;
+        logMessageFmt("info", "Sensors enabled (deep sleep — read in %ds)", onTimeSec + 5);
+    }
 }
 
 void sensorsReinit() {
@@ -304,18 +297,13 @@ logMessageFmt("2","%s",merged);
         logMessage("warn", "sensorQueue full — dropping reading");
 }
 
-static void tickAllSensors(uint32_t nextReadMs) {
-    for (uint8_t i = 0; i < sensorCount; i++)
-        if (sensors[i]) sensors[i]->tick(nextReadMs);
-}
-
-static void processSensorCycle() {
+void processSensorCycle() {
     if (s_enabled) {
         uint32_t elapsed = millis() - s_lastRead;
         uint16_t intervalM = STATE_GET(teleIntervalM);
         if (intervalM == 0) intervalM = 1;
         uint32_t intervalMs = (uint32_t)intervalM * 60000UL;
-        tickAllSensors(s_lastRead + intervalMs);
+        for (uint8_t i = 0; i < sensorCount; i++) if (sensors[i]) sensors[i]->tick(s_lastRead + intervalMs);
         if (!s_windowOn) {
             uint32_t onTimeMs = STATE_GET(onTime) * 1000UL;
             uint32_t powerOnAt = intervalMs > onTimeMs ? intervalMs - onTimeMs : 0;
@@ -344,9 +332,3 @@ void sensorTask(void* pvParameters) {
         vTaskDelay(pdMS_TO_TICKS(10));
     }
 }
-
-#ifdef ESP8266
-void sensorProcess() {
-    processSensorCycle();
-}
-#endif

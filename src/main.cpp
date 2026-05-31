@@ -165,7 +165,7 @@ void loop() {
     loggerProcess();
     webProcess();
     uplinkProcess();
-    sensorProcess();
+    processSensorCycle();
 }
 #else
 void loop() {
