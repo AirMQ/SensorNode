@@ -151,7 +151,8 @@ void sendTelemetry() {
     uint32_t now = millis() / 1000;
 
 #ifdef BOARD_ESP8266
-    float vcc = ESP.getVcc() / 1000.0f;
+//    float vcc = ESP.getVcc() / 1000.0f;
+    float vcc = analogRead(A0) / 1023.0f*4.3;
 #else
     float vcc = 0.0f;
 #endif
@@ -988,8 +989,7 @@ static void processConnectedLoop() {
         }
     }
 
-    int8_t sn = STATE_GET(sampleNum);
-    if (batchCount >= sn && batchCount > 0) {
+    if (batchCount >= STATE_GET(sampleNum) && batchCount > 0) {
         publishSensorData(batch, batchCount);
         STATE_LOCK();
         sysState.readingCount += batchCount;

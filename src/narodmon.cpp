@@ -15,7 +15,7 @@ bool send_to_narodmon(const char* p) {
   //  const char *p = json_data;
     uint32_t chipId = STATE_GET(chipId);
     char NMmerged[256];
-    snprintf(NMmerged, sizeof(NMmerged), "{\"devices\":[{\"mac\":\"AIRMQ%d\",\"sensors\":[", chipId);
+    snprintf(NMmerged, sizeof(NMmerged), "{\"devices\":[{\"mac\":\"AIRMQ%d\",\"sensors\":[{\"id\":\"Vbat\",\"value\":%.2f},", chipId, roundf(analogRead(A0) / 1023.0f * 430.0f) / 100.0f);
     size_t pos = strlen(NMmerged); // Текущая позиция записи в NMmerged
     bool first = true;                 // Флаг первой пары (чтобы не ставить запятую в начале)
 
@@ -80,7 +80,7 @@ bool send_to_narodmon(const char* p) {
     }
 
     // Опционально: закрываем скобки, чтобы JSON был синтаксически валидным
-     snprintf(NMmerged + pos, sizeof(NMmerged) - pos, "]}]}"); // {"devices":[{"mac":"DEVICE_MAC","sensors":[{{"id":"Temp","value":24.56}}}]}}
+     snprintf(NMmerged + pos, sizeof(NMmerged) - pos, "]}]}"); // {"devices":[{"mac":"DEVICE_MAC","sensors":[{"id":"Temp","value":24.56}]}]}
  logMessageFmt("NM","%s",NMmerged);
 
     WiFiClient client;

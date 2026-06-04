@@ -98,7 +98,8 @@ static void handleGetState() {
     doc["narodmon"]   = getNarodmonMode();
     doc["onTime"]     = sysState.onTime;
 #ifdef ESP8266
-    doc["vcc"]        = ESP.getVcc() / 1000.0f;
+//    doc["vcc"]        = ESP.getVcc() / 1000.0f;
+    doc["vcc"]        = roundf(analogRead(A0) / 1023.0f * 430.0f) / 100.0f;
 #else
     doc["vcc"]        = 0.0f;
 #endif

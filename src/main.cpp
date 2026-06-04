@@ -13,7 +13,7 @@
 #include "sensors/sensor_manager.h"
 
 #ifdef ESP8266
-ADC_MODE(ADC_VCC);  // ESP.getVcc() reads the supply rail, not TOUT pin
+//ADC_MODE(ADC_VCC);  // ESP.getVcc() reads the supply rail, not TOUT pin
 #else
 #  include "esp_system.h"
 #endif
