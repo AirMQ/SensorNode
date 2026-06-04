@@ -95,6 +95,14 @@ static void handleGetState() {
     doc["maintenance"] = getMaintenanceMode();
     doc["deepSleep"]  = getDeepSleepMode();
     doc["ignoreCmd"]  = getIgnoreCmdMode();
+    doc["narodmon"]   = getNarodmonMode();
+    doc["onTime"]     = sysState.onTime;
+#ifdef ESP8266
+//    doc["vcc"]        = ESP.getVcc() / 1000.0f;
+    doc["vcc"]        = roundf(analogRead(A0) / 1023.0f * 430.0f) / 100.0f;
+#else
+    doc["vcc"]        = 0.0f;
+#endif
 
     sendJsonDoc(200, doc);
 }
@@ -141,7 +149,7 @@ static void handlePostWifi() {
     const char* effectivePass2 = (strlen(pass2) == 0 && strcmp(ssid2, curSsid2) == 0) ? curPass2 : pass2;
 
     if (!saveWifiCreds(ssid, effectivePass, ssid2, effectivePass2)) { sendJson(500, "{\"error\":\"Save failed\"}"); return; }
-    logMessage(String("WiFi saved: ") + ssid, "info");
+    logMessageFmt("info", "WiFi saved: %s", ssid);
     sendJson(200, "{\"ok\":true,\"msg\":\"Saved.\"}");
 
 }
@@ -204,7 +212,7 @@ static void handlePostMqttConfig() {
     if (strlen(cfg.broker) == 0) { sendJson(400, "{\"error\":\"broker required\"}"); return; }
     if (!lfsReady) { sendJson(503, "{\"error\":\"Filesystem unavailable — reflash with correct partition table\"}"); return; }
     if (!saveMqttConfig(cfg)) { sendJson(500, "{\"error\":\"Save failed\"}"); return; }
-    logMessage("MQTT config saved", "info");
+    logMessage("info", "MQTT config saved");
     sendJson(200, "{\"ok\":true,\"msg\":\"Saved.\"}");
 
 }
@@ -270,7 +278,7 @@ static void handlePostHwConfig() {
     if (!doc["onTime"].isNull())        cfg.onTime        = doc["onTime"].as<uint16_t>();
     if (!lfsReady) { sendJson(503, "{\"error\":\"Filesystem unavailable — reflash with correct partition table\"}"); return; }
     if (!saveHwConfig(cfg)) { sendJson(500, "{\"error\":\"Save failed\"}"); return; }
-    logMessage("HW config saved", "info");
+    logMessage("info", "HW config saved");
     sendJson(200, "{\"ok\":true,\"msg\":\"Saved.\"}");
 
 }
@@ -346,7 +354,7 @@ static void handlePostSensorSetup() {
         xSemaphoreGive(sensorSetupMutex);
         if (!saveSensorSetup()) { sendJson(500, "{\"error\":\"Save failed\"}"); return; }
         sendJson(200, "{\"ok\":true}");
-        logMessage("Sensor setup updated via web", "info");
+        logMessage("info", "Sensor setup updated via web");
         sensorsReinit();
     } else {
         sendJson(503, "{\"error\":\"busy\"}");
@@ -436,21 +444,28 @@ static void handleOtaUpload() {
         ledUpdate();  // push cyan to hardware immediately
         otaBeginOk = OTA_BEGIN(upload.contentLength);
         if (otaBeginOk) {
-            logMessage("OTA upload: " + upload.filename, "info");
+            logMessageFmt("info", "OTA upload: %s", upload.filename.c_str());
         } else {
-            logMessage("OTA begin failed: " + String(OTA_ERROR_STRING()) +
-                       " — partition table mismatch? Reflash via serial.", "error");
+            char errBuf[128];
+            snprintf(errBuf, sizeof(errBuf), "OTA begin failed: %s — partition table mismatch? Reflash via serial.", OTA_ERROR_STRING());
+            logMessageFmt("error", "%s", errBuf);
         }
     } else if (upload.status == UPLOAD_FILE_WRITE) {
         if (!otaBeginOk) return;
-        if (Update.write(upload.buf, upload.currentSize) != upload.currentSize)
-            logMessage("OTA write error: " + String(OTA_ERROR_STRING()), "error");
+        if (Update.write(upload.buf, upload.currentSize) != upload.currentSize) {
+            char errBuf[128];
+            snprintf(errBuf, sizeof(errBuf), "OTA write error: %s", OTA_ERROR_STRING());
+            logMessageFmt("error", "%s", errBuf);
+        }
     } else if (upload.status == UPLOAD_FILE_END) {
         if (!otaBeginOk) return;
         if (Update.end(true))
-            logMessage("OTA upload complete: " + String(upload.totalSize) + " bytes", "info");
-        else
-            logMessage("OTA end failed: " + String(OTA_ERROR_STRING()), "error");
+            logMessageFmt("info", "OTA upload complete: %d bytes", upload.totalSize);
+        else {
+            char errBuf[128];
+            snprintf(errBuf, sizeof(errBuf), "OTA end failed: %s", OTA_ERROR_STRING());
+            logMessageFmt("error", "%s", errBuf);
+        }
     }
 }
 
@@ -459,7 +474,7 @@ static void handleOtaResponse() {
         sendJson(500, String("{\"ok\":false,\"error\":\"") + OTA_ERROR_STRING() + "\"}");
     else {
         sendJson(200, "{\"ok\":true,\"msg\":\"Rebooting...\"}");
-        logMessage("OTA done — rebooting", "info");
+        logMessage("info", "OTA done — rebooting");
         vTaskDelay(pdMS_TO_TICKS(500));
         DEVICE_RESTART();
     }
@@ -478,14 +493,14 @@ static void handleConfigReset() {
     LittleFS.remove(HW_CONF_PATH);
     LittleFS.remove(SENSOR_SETUP_PATH);
 
-    logMessage("Config reset — rebooting", "warn");
+    logMessage("warn", "Config reset — rebooting");
     sendJson(200, "{\"ok\":true,\"msg\":\"Config reset — rebooting\"}");
     rebootPending = true;
 }
 
-// ─── GET /api/fs ──────────────────────────────────────────────────────────────
-
-static void handleGetFs() {
+// ─── GET /api/fs/list (list files) ────────────────────────────────────────────
+static void handleGetFsList() {
+    String filename = httpServer.arg("file");
     JsonDocument doc;
     doc["mounted"] = lfsReady;
     JsonArray files = doc["files"].to<JsonArray>();
@@ -500,7 +515,134 @@ static void handleGetFs() {
         }
         root.close();
     }
-    sendJsonDoc(200, doc);
+    
+    // Send file list via WebSocket
+    String output;
+    serializeJson(doc, output);
+    logMessageFmt("info", "FS: Listed %d files", files.size());
+    broadcastFsList(output);
+    
+    httpServer.send(200, "text/plain", "OK");
+}
+
+// ─── GET /api/fs/read (read file) ─────────────────────────────────────────────
+
+static void handleGetFsRead() {
+    String filename = httpServer.arg("file");
+
+    if (filename.length() == 0) {
+        logMessageFmt("info", "FS: No filename provided");
+        httpServer.send(400, "text/plain", "OK");
+        return;
+    }
+
+    if (!lfsReady) {
+        logMessageFmt("info", "FS: File system not mounted");
+        httpServer.send(503, "text/plain", "OK");
+        return;
+    }
+    String fullPath = filename;
+    if (!fullPath.startsWith("/")) {
+        fullPath = "/" + fullPath;
+    }
+    if (!LittleFS.exists(fullPath)) {
+        logMessageFmt("info", "FS: File not found: %s", filename.c_str());
+        httpServer.send(404, "text/plain", "OK");
+        return;
+    }
+    File file = LittleFS.open(fullPath, "r");
+    if (!file) {
+        logMessageFmt("info", "FS: Failed to open file: %s", filename.c_str());
+        httpServer.send(500, "text/plain", "OK");
+        return;
+    }
+    String content = file.readString();
+    file.close();
+    logMessageFmt("info", "FS: File read: %s (%d bytes)", filename.c_str(), content.length());
+    broadcastFsContent(content);
+    httpServer.send(200, "text/plain", "OK");
+}
+
+// ─── POST /api/fs (save file) ─────────────────────────────────────────────────
+
+static void handlePostFs() {
+    String filename = httpServer.arg("file");
+
+    if (filename.length() == 0) {
+        logMessageFmt("info", "FS: No filename provided");
+        httpServer.send(200, "text/plain", "OK");
+        return;
+    }
+
+    if (!lfsReady) {
+        logMessageFmt("info", "FS: File system not mounted");
+        httpServer.send(200, "text/plain", "OK");
+        return;
+    }
+
+    String fullPath = filename;
+    if (!fullPath.startsWith("/")) {
+        fullPath = "/" + fullPath;
+    }
+
+    String content = httpServer.arg("plain");
+
+    File file = LittleFS.open(fullPath, "w");
+    if (!file) {
+        logMessageFmt("info", "FS: Failed to open file for writing: %s", fullPath.c_str());
+        httpServer.send(200, "text/plain", "OK");
+        return;
+    }
+
+    size_t written = file.print(content);
+    file.close();
+
+    if (written == 0 && content.length() > 0) {
+        logMessageFmt("info", "FS: Failed to write content: %s", fullPath.c_str());
+        httpServer.send(200, "text/plain", "OK");
+        return;
+    }
+
+    logMessageFmt("info", "FS: Saved %s (%d bytes)", fullPath.c_str(), written);
+    httpServer.send(200, "text/plain", "OK");
+}
+
+// ─── DELETE /api/fs (delete file) ─────────────────────────────────────────────
+
+static void handleDeleteFs() {
+    String filename = httpServer.arg("file");
+
+    if (filename.length() == 0) {
+        logMessageFmt("info", "FS: No filename provided");
+        httpServer.send(200, "text/plain", "OK");
+        return;
+    }
+
+    if (!lfsReady) {
+        logMessageFmt("info", "FS: File system not mounted");
+        httpServer.send(200, "text/plain", "OK");
+        return;
+    }
+
+    String fullPath = filename;
+    if (!fullPath.startsWith("/")) {
+        fullPath = "/" + fullPath;
+    }
+
+    if (!LittleFS.exists(fullPath)) {
+        logMessageFmt("info", "FS: File not found: %s", filename.c_str());
+        httpServer.send(200, "text/plain", "OK");
+        return;
+    }
+
+    if (!LittleFS.remove(fullPath)) {
+        logMessageFmt("info", "FS: Failed to delete file: %s", fullPath.c_str());
+        httpServer.send(200, "text/plain", "OK");
+        return;
+    }
+
+    logMessageFmt("info", "FS: Deleted %s", filename.c_str());
+    httpServer.send(200, "text/plain", "OK");
 }
 
 // ─── GET /api/utils/i2c-scan ─────────────────────────────────────────────────
@@ -588,7 +730,7 @@ static void handlePostFeatures() {
     if (!doc["web"].isNull())   f.web   = doc["web"].as<bool>();
     if (!doc["wsLog"].isNull()) f.wsLog = doc["wsLog"].as<bool>();
     if (!saveFeatures(f)) { sendJson(500, "{\"error\":\"save failed\"}"); return; }
-    logMessage("Features saved", "info");
+    logMessage("info", "Features saved");
     sendJson(200, "{\"ok\":true,\"msg\":\"Saved.\"}");
 
 }
@@ -635,7 +777,10 @@ static void webServerSetup() {
     // Other
     httpServer.on("/api/state",      HTTP_GET,  handleGetState);
     httpServer.on("/api/cmd",        HTTP_POST, handlePostCmd);
-    httpServer.on("/api/fs",         HTTP_GET,  handleGetFs);
+    httpServer.on("/api/fs/list",    HTTP_GET,  handleGetFsList);
+    httpServer.on("/api/fs/read",    HTTP_GET,  handleGetFsRead);
+    httpServer.on("/api/fs",         HTTP_POST, handlePostFs);
+    httpServer.on("/api/fs",         HTTP_DELETE, handleDeleteFs);
     httpServer.on("/api/ota",         HTTP_POST, handleOtaResponse, handleOtaUpload);
     httpServer.on("/api/ota/version", HTTP_GET,  handleGetOtaVersion);
 
@@ -650,8 +795,8 @@ static void webServerSetup() {
     });
 
     httpServer.begin();
-    logMessage("HTTP server started on port 80", "info");
-    logMessage("WebSocket log on port 81", "info");
+    logMessage("info", "HTTP server started on port 80");
+    logMessage("info", "WebSocket log on port 81");
 }
 
 void webTask(void* pvParameters) {
@@ -660,7 +805,7 @@ void webTask(void* pvParameters) {
         if (s_webEnabled) {
             httpServer.handleClient();
             if (rebootPending) {
-                logMessage("Rebooting...", "info");
+                logMessage("info", "Rebooting...");
                 vTaskDelay(pdMS_TO_TICKS(500));
                 DEVICE_RESTART();
             }
@@ -678,7 +823,7 @@ void webProcess() {
     if (!s_webEnabled) return;
     httpServer.handleClient();
     if (rebootPending) {
-        logMessage("Rebooting...", "info");
+        logMessage("info", "Rebooting...");
         delay(500);
         DEVICE_RESTART();
     }

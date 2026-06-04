@@ -16,12 +16,12 @@ void sensorsInit();
 void sensorsReinit();
 
 // Enable measurement cycles; call after MQTT startup handshake completes
-void sensorsEnable();
+//void sensorsEnable();
 
 // Like sensorsEnable() but schedules the first read at (onTime + 5) seconds
 // from now, regardless of teleIntervalM. Used in deep sleep mode so the device
 // reads once as soon as the PMS7003 is warm, then hands off to the sleep cycle.
-void sensorsEnableDeepSleep();
+void sensorsEnableDeepSleep(bool DeepSleep);
 
 // Number of sensors that successfully initialized
 uint8_t sensorsActiveCount();
@@ -29,6 +29,4 @@ uint8_t sensorsActiveCount();
 // Fill doc with last known values per sensor type: {"bme280":{"temp":21.5,...},...}
 void sensorGetLastValues(JsonDocument& out);
 
-#ifdef ESP8266
-void sensorProcess();
-#endif
+void processSensorCycle();

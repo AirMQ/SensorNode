@@ -44,7 +44,7 @@ body.dark{
   --btn-bg:#23395d;--btn-border:#7eb8f7;--btn-text:#7eb8f7;--btn-hover:#2d4a7a;
   --btn-danger-bg:#2a1515;--btn-danger-color:#e57373;--btn-danger-border:#e57373;--btn-danger-hover:#3a1f1f;
   --log-bg:#0d0d0d;--log-border:#222;
-  --log-info:#9ecfff;--log-warn:#ffa726;--log-error:#e57373;--log-debug:#666;--log-ts:#444;
+  --log-info:#9ecfff;--log-warn:#ffa726;--log-error:#e57373;--log-debug:#666;--log-ts:#bbff00;
   --ok:#4caf50;--err:#e53935;--warn:#ffa726;
   --ap-banner-bg:#2a1500;
   --drag-handle:#444;--drag-over-outline:#7eb8f7;
@@ -73,20 +73,20 @@ header svg .fil0{fill:rgba(255,255,255,.92)}
 header svg .fil1{fill:rgba(0,60,100,.55)}
 body.dark header svg .fil0{fill:#7eb8f7}
 body.dark header svg .fil1{fill:#1a1a2e}
-main{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;padding:12px;flex:1}
+main{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;padding:12px;flex:1}
 @media(max-width:640px){main{grid-template-columns:1fr}}
 section{background:var(--bg-card);border:none;border-radius:6px;padding:12px;box-shadow:var(--shadow)}
 section h2{font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border-h2)}
 .full{grid-column:1/-1}
-.stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:6px}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:6px}
 .stat{background:var(--bg-stat);border:1px solid var(--border);border-radius:4px;padding:6px 8px}
-.stat .label{color:var(--text-dim);font-size:10px;margin-bottom:2px}
+.stat .label{color:var(--text-dim);font-size:18px;margin-bottom:2px}
 .stat .value{color:var(--text);font-size:13px}
 .ok{color:var(--ok)}
 .err{color:var(--err)}
 .warn{color:var(--warn)}
 .form-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
-.form-row label{color:var(--text-muted);width:90px;flex-shrink:0;font-size:11px}
+.form-row label{color:var(--text-muted);width:135px;flex-shrink:0;font-size:18px}
 .form-row input[type=number],.form-row input[type=text],.form-row input[type=password]{background:var(--bg-input);border:1px solid var(--border);color:var(--text);padding:3px 6px;border-radius:2px}
 .form-row input[type=number]{width:70px}
 .form-row input[type=text],.form-row input[type=password]{width:180px}
@@ -103,8 +103,8 @@ textarea{width:100%;background:var(--bg-input);border:1px solid var(--border);co
 .pass-toggle:hover{color:var(--pass-toggle-hover)}
 .msg{margin-top:6px;font-size:11px;min-height:14px}
 .ap-banner{margin-bottom:10px;padding:8px;background:var(--ap-banner-bg);border:1px solid var(--warn);border-radius:3px;color:var(--warn)}
-.sublabel{font-size:10px;color:var(--text-muted);margin-bottom:2px;text-transform:uppercase;letter-spacing:.05em}
-.hint-text{font-size:12px;color:var(--text-dim)}
+.sublabel{font-size:18px;color:var(--text-muted);margin-bottom:2px;text-transform:uppercase;letter-spacing:.05em}
+.hint-text{font-size:14px;color:var(--text-dim)}
 .cmd-divider{margin-top:10px;padding-top:8px;border-top:1px solid var(--cmd-divider)}
 .feat-warn{font-size:11px;color:var(--err);margin:2px 0 6px 90px}
 /* Sensor cards */
@@ -130,14 +130,14 @@ textarea{width:100%;background:var(--bg-input);border:1px solid var(--border);co
 .i2c-addr{background:var(--sc-values-bg);border:1px solid var(--sc-values-border);border-radius:2px;padding:2px 7px;margin-right:4px;color:var(--sc-val-v)}
 /* Log */
 #log{height:240px;overflow-y:auto;background:var(--log-bg);border:1px solid var(--log-border);padding:6px;border-radius:2px;display:flex;flex-direction:column}
-#ota-file{font-size:12px;font-family:monospace;color:var(--text-muted);background:none;border:none;padding:0;flex:1;min-width:0}
+#ota-file{font-size:18px;font-family:monospace;color:var(--text-muted);background:none;border:none;padding:0;flex:1;min-width:0}
 .log-entry{padding:1px 0;white-space:pre-wrap;word-break:break-all;line-height:1.5}
 .log-info{color:var(--log-info)}
 .log-warn{color:var(--log-warn)}
 .log-error{color:var(--log-error)}
 .log-debug{color:var(--log-debug)}
 .log-ts{color:var(--log-ts);font-size:11px;margin-right:6px}
-.ws-status{font-size:10px;color:var(--ws-status);margin-bottom:4px}
+.ws-status{font-size:18px;color:var(--ws-status);margin-bottom:4px}
 .ws-ok{color:var(--ws-ok)}
 .ws-err{color:var(--ws-err)}
 /* Drag */
@@ -150,8 +150,7 @@ textarea{width:100%;background:var(--bg-input);border:1px solid var(--border);co
 .sec-grip:hover{color:var(--grip-hover)}
 progress{accent-color:var(--accent);width:100%;height:6px;display:none;margin-top:6px}
 /* Toast */
-#toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:var(--toast-bg);border:1px solid var(--toast-border);color:var(--toast-color);padding:7px 18px;border-radius:4px;font-size:12px;z-index:999;pointer-events:none;opacity:0;transition:opacity .25s}
-#toast.show{opacity:1}
+#toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:var(--toast-bg);border:1px solid var(--toast-border);color:var(--toast-color);padding:20px 30px;border-radius:12px;font-size:28px!important;font-weight:bold;z-index:9999;pointer-events:none;opacity:0;transition:opacity .25s;box-shadow:0 8px 25px rgba(0,0,0,0.3);min-width:400px;max-width:600px;text-align:center}#toast.show{opacity:1}
 /* OTA confirm modal */
 #ota-modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:100}
 #ota-modal-box{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:20px 24px;max-width:420px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,.22)}
@@ -201,6 +200,7 @@ progress{accent-color:var(--accent);width:100%;height:6px;display:none;margin-to
       <div class="stat"><div class="label">Build</div><div class="value" id="s-build">—</div></div>
       <div class="stat"><div class="label">Time</div><div class="value" id="s-time">—</div></div>
       <div class="stat"><div class="label">NTP</div><div class="value" id="s-ntp">—</div></div>
+      <div class="stat"><div class="label">Vcc</div><div class="value" id="s-vcc">—</div></div>
     </div>
   </section>
 
@@ -230,13 +230,17 @@ progress{accent-color:var(--accent);width:100%;height:6px;display:none;margin-to
 
   <!-- MQTT Config -->
   <section id="mqtt-section" class="draggable-section" draggable="true">
-    <h2>MQTT Config</h2>
-    <div class="form-row"><label>Broker</label><input type="text" id="mqtt-broker" placeholder="hostname or IP" style="width:200px"></div>
+    <h2>Network Config</h2>
+    <div class="form-row"><label>MQTT Broker</label><input type="text" id="mqtt-broker" placeholder="hostname or IP" style="width:200px"></div>
     <div class="form-row"><label>Port</label><input type="number" id="mqtt-port" min="1" max="65535"></div>
     <div class="form-row"><label>Topic Prefix</label><input type="text" id="mqtt-prefix" placeholder="Sensors/" style="width:140px"></div>
     <div class="form-row" id="mqtt-tls-row"><label>TLS / MQTTS</label><input type="checkbox" id="mqtt-tls"></div>
     <button class="btn" onclick="saveMqttConfig()">Save</button>
     <div class="msg" id="mqtt-msg"></div>
+    <div class="form-row" style="margin-bottom:4px">
+      <input type="checkbox" id="narodmon-btn" onchange="toggleNarodmon()">
+      <label for="narodmon-btn" style="width:auto;cursor:pointer">Narodmon</label>
+    </div>
   </section>
 
   <!-- Hardware Setup -->
@@ -267,14 +271,17 @@ progress{accent-color:var(--accent);width:100%;height:6px;display:none;margin-to
       <a class="btn" href="/api/config/export">Download Config</a>
     </div>
     <div class="msg" id="sensorsetup-msg"></div>
+    <div class="cmd-divider"></div>
+    <button class="btn" onclick="runI2cScan()">Scan I2C Bus</button>
+    <span id="i2c-result"></span>
   </section>
 
   <!-- Commands -->
   <section id="cmd-section" class="draggable-section" draggable="true">
     <h2>Commands</h2>
     <div class="btn-row">
-      <button class="btn danger" onclick="sendCmd({cmd:'reboot'})">Reboot</button>
       <button class="btn" onclick="sendCmd({cmd:'telemetry'})">Send Telemetry</button>
+      <button class="btn danger" onclick="sendCmd({cmd:'reboot'})">Reboot</button>
     </div>
     <div class="cmd-divider">
       <div class="form-row" style="margin-bottom:4px">
@@ -293,24 +300,51 @@ progress{accent-color:var(--accent);width:100%;height:6px;display:none;margin-to
         <input type="checkbox" id="ign_cmd-btn" onchange="toggleIgnCmd()">
         <label for="ign_cmd-btn" style="width:auto;cursor:pointer">Ignore MQTT Commands</label>
       </div>
+
+      <div class="form-row" style="margin-bottom:4px">
+        <label for="tele-interval-select" style="width:auto;color:var(--text-muted)">Tele Interval:</label>
+        <select id="tele-interval-select" onchange="setTeleInterval()" style="background:var(--bg-input);border:1px solid var(--border);color:var(--text);padding:3px 6px;border-radius:2px;font-size:12px">
+          <option value="1">1 min</option>
+          <option value="2">2 min</option>
+          <option value="5">5 min</option>
+          <option value="10">10 min</option>
+          <option value="15">15 min</option>
+          <option value="20">20 min</option>
+          <option value="30">30 min</option>
+          <option value="60">60 min</option>
+        </select>
+      </div>
+
+      <div class="form-row" style="margin-bottom:4px">
+        <label for="on-time-select" style="width:auto;color:var(--text-muted)">On Time:</label>
+        <select id="on-time-select" onchange="setOnTime()" style="background:var(--bg-input);border:1px solid var(--border);color:var(--text);padding:3px 6px;border-radius:2px;font-size:12px">
+          <option value="5">5 sec</option>
+          <option value="30">30 sec</option>
+          <option value="40">40 sec</option>
+        </select>
+      </div>
+
     </div>
     <div class="cmd-divider">
       <div class="sublabel" style="margin-bottom:6px">Provision Config</div>
       <div class="btn-row">
-        <button class="btn" onclick="sendCmd({cmd:'configBackup'})">Save Provision Config</button>
-        <button class="btn danger" onclick="if(confirm('Restore config from broker? Device will re-provision.'))sendCmd({cmd:'configRestore'})">Restore Config</button>
+        <button class="btn" onclick="sendCmd({cmd:'configBackup'})">Save to MQTT</button>
+        <button class="btn danger" onclick="if(confirm('Restore config from broker? Device will re-provision.'))sendCmd({cmd:'configRestore'})">Restore from MQTT</button>
       </div>
     </div>
     <div class="cmd-divider">
       <div class="sublabel" style="margin-bottom:6px">Factory Reset</div>
-      <div class="form-row"><label style="color:var(--text-muted);width:auto;margin-right:8px"><input type="checkbox" id="reset-keep-wifi" style="margin-right:4px">Keep WiFi</label><label style="color:var(--text-muted);width:auto"><input type="checkbox" id="reset-keep-mqtt" style="margin-right:4px">Keep MQTT</label></div>
-      <button class="btn danger" onclick="doFactoryReset()" style="margin-top:6px">Factory Reset</button>
+      <div class="form-row">
+        <input type="checkbox" id="reset-keep-wifi" checked><label for="reset-keep-wifi" style="width:auto;cursor:pointer">Keep WiFi</label>
+        <input type="checkbox" id="reset-keep-mqtt" checked><label for="reset-keep-mqtt" style="width:auto;cursor:pointer">Keep MQTT</label>
+        <button class="btn danger" onclick="doFactoryReset()" style="margin-top:6px">Factory Reset</button>
+      </div>
     </div>
     <div class="msg" id="cmd-msg"></div>
   </section>
 
   <!-- Firmware Update -->
-  <section id="ota-section" class="full draggable-section" draggable="true">
+  <section id="ota-section" class="draggable-section" draggable="true">
     <h2>Firmware Update</h2>
     <div style="display:flex;align-items:center;gap:8px">
       <input type="file" id="ota-file" accept=".bin">
@@ -327,16 +361,28 @@ progress{accent-color:var(--accent);width:100%;height:6px;display:none;margin-to
   <!-- Utils -->
   <section id="utils-section" class="draggable-section" draggable="true">
     <h2>Utils</h2>
-    <div class="sublabel" style="margin-bottom:8px">I2C Scanner</div>
-    <button class="btn" onclick="runI2cScan()">Scan I2C Bus</button>
-    <div id="i2c-result" style="margin-top:8px;font-size:12px;min-height:20px"></div>
+    <div class="sublabel" style="margin:8px 0">File System</div>
+    <div class="form-row" style="margin-top:8px">
+      <button class="btn" onclick="listFiles()">List Files</button>
+      <input type="text" id="fs-filename" placeholder="filename.txt" style="flex:1">
+      <button class="btn" onclick="readFile()">Read File</button>
+      <button class="btn" onclick="saveFile()">Save File</button>
+      <button class="btn" onclick="deleteFile()" style="background:#dc3545">Delete File</button>
+    </div>
+    <textarea id="fs-result" spellcheck="false" style="margin-top:8px;font-size:12px;min-height:48px;white-space:pre-wrap;font-family:monospace;resize:vertical"></textarea>
   </section>
 
   <!-- Features -->
   <section id="features-section" class="draggable-section" draggable="true">
     <h2>Features</h2>
-    <div class="form-row"><label>WebSocket Log (port 81)</label><input type="checkbox" id="feat-wslog" checked></div>
-    <div class="form-row"><label>Web UI (port 80)</label><input type="checkbox" id="feat-web" checked></div>
+    <div class="form-row">
+      <input type="checkbox" id="feat-wslog">
+      <label for="feat-wslog" style="width:auto;cursor:pointer">WebSocket Log (port 81)</label>
+    </div>
+    <div class="form-row">
+      <input type="checkbox" id="feat-web">
+      <label for="feat-web" style="width:auto;cursor:pointer">Web UI (port 80)</label>
+    </div>
     <div id="feat-web-warn" class="feat-warn" style="display:none">Disabling requires MQTT cmd to re-enable</div>
     <button class="btn" onclick="saveFeatures()">Apply</button>
     <div class="msg" id="feat-msg"></div>
@@ -393,6 +439,7 @@ function loadState() {
       set('s-sample', d.sampleNum);
       set('s-tele',   d.teleInterval + ' min');
       set('s-build',  d.build);
+      set('s-vcc',   (d.vcc && d.vcc > 0) ? d.vcc + ' V' : '—');
       if (d.ntpSynced && d.epochTime) {
         var dt = new Date(d.epochTime*1000);
         set('s-time', pad(dt.getHours())+':'+pad(dt.getMinutes())+':'+pad(dt.getSeconds()));
@@ -415,6 +462,12 @@ function loadState() {
       
       ignCmdOn = !!d.ignoreCmd;
       document.getElementById('ign_cmd-btn').checked = ignCmdOn;
+
+      narodmonOn = !!d.narodmon;
+      document.getElementById('narodmon-btn').checked = narodmonOn;
+
+      if (d.teleInterval !== undefined) document.getElementById('tele-interval-select').value = String(d.teleInterval);
+      if (d.onTime !== undefined)       document.getElementById('on-time-select').value = String(d.onTime);
     })
     .catch(function(){set('s-wifi','<span class="err">fetch failed</span>')});
   loadSensorValues();
@@ -777,6 +830,23 @@ function toggleIgnCmd() {
   postJson('/api/cmd', {ignoreCmd: ignCmdOn}, 'cmd-msg');
 }
 
+var narodmonOn = false;
+function toggleNarodmon() {
+  narodmonOn = !narodmonOn;
+  postJson('/api/cmd', {narodmon: narodmonOn}, 'cmd-msg');
+}
+
+function setTeleInterval() {
+  var val = parseInt(document.getElementById('tele-interval-select').value, 10);
+  document.getElementById('s-tele').textContent = val + ' min'; //Одновременно меняем значение s-tele
+  postJson('/api/cmd', {teleIntervalM: val}, 'cmd-msg');
+}
+
+function setOnTime() {
+  var val = parseInt(document.getElementById('on-time-select').value, 10);
+  postJson('/api/cmd', {onTime: val}, 'cmd-msg');
+}
+
 // ── Features ───────────────────────────────────────────────────────────────────
 function loadFeatures() {
   fetch('/api/features')
@@ -886,6 +956,48 @@ function runI2cScan() {
     .catch(function(){el.innerHTML='<span class="err">Scan failed</span>';});
 }
 
+function listFiles() {
+  fetch('/api/fs/list')
+    .catch(function(){});
+}
+
+function readFile() {
+  var name = document.getElementById('fs-filename').value.trim();
+  fetch('/api/fs/read?file=' + encodeURIComponent(name))
+    .catch(function(e){});
+}
+
+function saveFile() {
+  var name = document.getElementById('fs-filename').value.trim();
+  var el = document.getElementById('fs-result');
+  var content = el.value;
+
+  fetch('/api/fs?file=' + encodeURIComponent(name), {
+    method: 'POST',
+    headers: {'Content-Type': 'text/plain'},
+    body: content
+  })
+    .finally(function() {
+      // Выполняется всегда, независимо от успеха или ошибки запроса
+      listFiles();
+    })
+    .catch(function(e) {
+      // Ошибку можно залогировать, но список всё равно обновится в finally
+    });
+}
+
+function deleteFile() {
+  var name = document.getElementById('fs-filename').value.trim();
+  if (!confirm('Delete file: ' + name + '?')) { return; }
+  fetch('/api/fs?file=' + encodeURIComponent(name), {
+    method: 'DELETE'
+  })
+    .finally(function() {
+      listFiles();
+    })
+    .catch(function(e){});
+}
+
 // ── Helpers ────────────────────────────────────────────────────────────────────
 function postJson(url, body, msgId) {
   fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
@@ -929,6 +1041,21 @@ function connectWs() {
   ws.onerror = function(){ ws.close(); };
   ws.onmessage = function(evt){
     var d; try{d=JSON.parse(evt.data);}catch(e){return;}
+
+    // Handle file system responses
+    if (d.hasOwnProperty('files')) {
+      var el = document.getElementById('fs-result');
+      if (!d.mounted) { return; }
+      var files = d.files || [];
+      el.value = files.map(function(f){ return f.name + ' (' + f.size + ' bytes)'; }).join('\n');
+      return;
+    }
+    if (d.hasOwnProperty('fsContent')) {
+      var el = document.getElementById('fs-result');
+      el.value = d.fsContent;
+      return;
+    }
+
     if (d.l === 'otapct') {
       var pct = parseInt(d.m);
       var prog = document.getElementById('ota-progress');
@@ -938,7 +1065,7 @@ function connectWs() {
       d = {t: d.t, m: 'OTA: ' + pct + '%', l: 'info'};
     }
     // Handle toggle state broadcast from handleCommand
-    if (d.hasOwnProperty('maintenance') || d.hasOwnProperty('deepSleep') || d.hasOwnProperty('debugLog') || d.hasOwnProperty('ignoreCmd')) {
+    if (d.hasOwnProperty('maintenance') || d.hasOwnProperty('deepSleep') || d.hasOwnProperty('debugLog') || d.hasOwnProperty('ignoreCmd') || d.hasOwnProperty('narodmon') || d.hasOwnProperty('teleIntervalM') || d.hasOwnProperty('onTime')) {
       if (d.hasOwnProperty('debugLog')) {
         debugOn = !!d.debugLog;
         document.getElementById('debug-btn').checked = debugOn;
@@ -954,6 +1081,19 @@ function connectWs() {
       if (d.hasOwnProperty('ignoreCmd')) {
         ignCmdOn = !!d.ignoreCmd;
         document.getElementById('ign_cmd-btn').checked = ignCmdOn;
+      }
+      if (d.hasOwnProperty('narodmon')) {
+        narodmonOn = !!d.narodmon;
+        document.getElementById('narodmon-btn').checked = narodmonOn;
+      }
+      if (d.hasOwnProperty('teleIntervalM')) {
+        var val = String(d.teleIntervalM);
+        document.getElementById('tele-interval-select').value = val;
+        document.getElementById('s-tele').textContent = val + ' min';
+      }
+      if (d.hasOwnProperty('onTime')) {
+        var val = String(d.onTime);
+        document.getElementById('on-time-select').value = val;
       }
       return;
     }
@@ -1009,8 +1149,8 @@ setInterval(loadState, 15000);
 
 // ── Section resize ─────────────────────────────────────────────────────────────
 (function(){
-  function getSpan(el){return parseInt(el.getAttribute('data-span')||(el.classList.contains('full')?'3':'1'));}
-  function setSpan(el,n){n=Math.max(1,Math.min(3,n));el.setAttribute('data-span',n);el.style.gridColumn=n>1?'span '+n:'';if(n===3)el.classList.add('full');else el.classList.remove('full');}
+  function getSpan(el){return parseInt(el.getAttribute('data-span')||(el.classList.contains('full')?'4':'1'));}
+  function setSpan(el,n){n=Math.max(1,Math.min(4,n));el.setAttribute('data-span',n);el.style.gridColumn=n>1?'span '+n:'';if(n===4)el.classList.add('full');else el.classList.remove('full');}
   function saveSpans(){var s={};document.querySelectorAll('.draggable-section').forEach(function(x){if(x.id)s[x.id]=getSpan(x);});localStorage.setItem('sSpans',JSON.stringify(s));}
   document.querySelectorAll('.draggable-section').forEach(function(el){
     setSpan(el,getSpan(el));

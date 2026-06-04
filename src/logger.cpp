@@ -11,37 +11,85 @@ static bool debugLogEnabled = false;
 static bool maintenanceModeEnabled = false;
 static bool deepSleepModeEnabled = false;
 static bool ignoreCmdModeEnabled = false;
+static bool narodmonEnabled = false;
 static bool s_wsEnabled = true;
 
 void setDebugLog(bool en) { debugLogEnabled = en; }
 bool getDebugLog()        { return debugLogEnabled; }
 
-void setMaintenanceMode(bool en) {
-    maintenanceModeEnabled = en;
-    broadcastButtonState(maintenanceModeEnabled, deepSleepModeEnabled, ignoreCmdModeEnabled);
-}
+void setMaintenanceMode(bool en) {maintenanceModeEnabled = en;   broadcast_maintenance(en);}
+void setDeepSleepMode(bool en)   {deepSleepModeEnabled = en;     broadcast_deepSleep(en);}
+void setIgnoreCmdMode(bool en)   {ignoreCmdModeEnabled = en;     broadcast_ignoreCmd(en);}
+void setNarodmonMode(bool en)    {narodmonEnabled = en;          broadcast_narodmon(en);}
+
 bool getMaintenanceMode() { return maintenanceModeEnabled; }
-
-void setDeepSleepMode(bool en) {
-    deepSleepModeEnabled = en;
-    broadcastButtonState(maintenanceModeEnabled, deepSleepModeEnabled, ignoreCmdModeEnabled);
-}
 bool getDeepSleepMode() { return deepSleepModeEnabled; }
-
-void setIgnoreCmdMode(bool en) {
-    ignoreCmdModeEnabled = en;
-    broadcastButtonState(maintenanceModeEnabled, deepSleepModeEnabled, ignoreCmdModeEnabled);
-}
 bool getIgnoreCmdMode() { return ignoreCmdModeEnabled; }
+bool getNarodmonMode()  { return narodmonEnabled; }
 
 void loggerSetWsEnabled(bool en) { s_wsEnabled = en; }
 
-void broadcastButtonState(bool maintenance, bool deepSleep, bool ignoreCmd) {
+void broadcast_maintenance(bool maintenance) {
     if (!wsStarted) return;
     JsonDocument doc;
     doc["maintenance"] = maintenance;
+    String out;
+    serializeJson(doc, out);
+    wsServer.broadcastTXT(out);
+}
+void broadcast_deepSleep(bool deepSleep) {
+    if (!wsStarted) return;
+    JsonDocument doc;
     doc["deepSleep"] = deepSleep;
+    String out;
+    serializeJson(doc, out);
+    wsServer.broadcastTXT(out);
+}
+void broadcast_ignoreCmd( bool ignoreCmd) {
+    if (!wsStarted) return;
+    JsonDocument doc;
     doc["ignoreCmd"] = ignoreCmd;
+    String out;
+    serializeJson(doc, out);
+    wsServer.broadcastTXT(out);
+}
+void broadcast_narodmon(bool narodmon) {
+    if (!wsStarted) return;
+    JsonDocument doc;
+    doc["narodmon"] = narodmon;
+    String out;
+    serializeJson(doc, out);
+    wsServer.broadcastTXT(out);
+}
+
+void broadcastTeleInterval(uint16_t teleIntervalM) {
+    if (!wsStarted) return;
+    JsonDocument doc;
+    doc["teleIntervalM"] = teleIntervalM;
+    String out;
+    serializeJson(doc, out);
+    wsServer.broadcastTXT(out);
+}
+
+void broadcastOnTime(uint16_t onTimeSec) {
+    if (!wsStarted) return;
+    JsonDocument doc;
+    doc["onTime"] = onTimeSec;
+    String out;
+    serializeJson(doc, out);
+    wsServer.broadcastTXT(out);
+}
+
+void broadcastFsList(const String& json) {
+    if (!wsStarted) return;
+    String payload = json;  // Create a mutable copy for the library
+    wsServer.broadcastTXT(payload);
+}
+
+void broadcastFsContent(const String& content) {
+    if (!wsStarted) return;
+    JsonDocument doc;
+    doc["fsContent"] = content;
     String out;
     serializeJson(doc, out);
     wsServer.broadcastTXT(out);
@@ -51,7 +99,7 @@ static LogEntry ringBuffer[LOG_RING_SIZE];
 static size_t   ringIndex = 0;
 static SemaphoreHandle_t ringMutex = NULL;
 
-void logMessage(const char* message, const char* level) {
+void logMessage(const char* level, const char* message) {
     if (!logQueue) return;
     if (strcmp(level, "debug") == 0 && !debugLogEnabled) return;
 
@@ -65,9 +113,26 @@ void logMessage(const char* message, const char* level) {
     xQueueSend(logQueue, &entry, 0);
     Serial.printf("[%s] %s\r\n", level, message);
 }
+void logMessageFmt(const char* level, const char* format, ...) {
+    static char buffer[128];
+    
+    va_list args;
+    va_start(args, format);
+    uint16_t needed = vsnprintf(buffer, sizeof(buffer), format, args);
+    va_end(args);
 
-void logMessage(const String& message, const char* level) {
-    logMessage(message.c_str(), level);
+    if (needed >= sizeof(buffer)) {
+        if (sizeof(buffer) > 4) {
+            buffer[sizeof(buffer) - 4] = '.';
+            buffer[sizeof(buffer) - 3] = '.';
+            buffer[sizeof(buffer) - 2] = '.';
+            buffer[sizeof(buffer) - 1] = '\0';
+        }
+    } else if (needed < 0) {
+        return;
+    }
+
+    logMessage(level, buffer);
 }
 
 static String serializeEntry(const LogEntry& entry) {

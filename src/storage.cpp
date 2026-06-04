@@ -53,15 +53,15 @@ bool storageInit() {
         }
         SPIFFS.end();
         if (migratedSpiffs)
-            logMessage(String("SPIFFS security.dat: migrating SSID=") + spiffsSSID, "warn");
+            logMessageFmt("warn", "SPIFFS security.dat: migrating SSID=%s", spiffsSSID);
         else
-            logMessage("SPIFFS mounted but no usable security.dat", "warn");
+            logMessage("warn", "SPIFFS mounted but no usable security.dat");
     }
 #pragma GCC diagnostic pop
 
     bool ok = LittleFS.begin();
     if (!ok) {
-        logMessage("LittleFS mount failed — formatting", "warn");
+        logMessage("warn", "LittleFS mount failed — formatting");
         LittleFS.format();
         ok = LittleFS.begin();
     }
@@ -92,20 +92,20 @@ bool storageInit() {
         if (!p) continue;
 
         // Erase superblock sectors so lfs_format() gets clean flash
-        logMessage(String("Erasing '") + labels[i] + "' superblocks for reformat", "warn");
+        logMessageFmt("warn", "Erasing '%s' superblocks for reformat", labels[i]);
         esp_partition_erase_range(p, 0, 0x2000); // blocks 0+1 = 8KB
         esp_vfs_littlefs_unregister(labels[i]);
         ok = LittleFS.begin(true, "/littlefs", 10, labels[i]);
         if (ok) {
             usedLabel = labels[i];
-            logMessage(String("LittleFS reformatted '") + labels[i] + "' (migration)", "warn");
+            logMessageFmt("warn", "LittleFS reformatted '%s' (migration)", labels[i]);
         }
     }
     if (ok && usedLabel && strcmp(usedLabel, "storage") != 0)
-        logMessage(String("LittleFS mounted on partition '") + usedLabel + "'", "warn");
+        logMessageFmt("warn", "LittleFS mounted on partition '%s'", usedLabel);
 #endif
     if (!ok) {
-        logMessage("LittleFS unavailable — no compatible partition found", "error");
+        logMessage("error", "LittleFS unavailable — no compatible partition found");
         return false;
     }
 
@@ -117,13 +117,13 @@ bool storageInit() {
     File root = LittleFS.open("/", "r");
     File entry = root.openNextFile();
     while (entry) {
-        logMessage(String("FS: /") + entry.name() + " (" + entry.size() + " bytes)", "info");
+        logMessageFmt("info", "FS: /%s (%d bytes)", entry.name(), entry.size());
         entry = root.openNextFile();
     }
     root.close();
 
     lfsReady = true;
-    logMessage("LittleFS mounted", "info");
+    logMessage("info", "LittleFS mounted");
     return true;
 }
 
@@ -173,7 +173,7 @@ bool loadWifiCreds(char* ssid, size_t ssidLen, char* pass, size_t passLen,
                 }
                 f.close();
                 if (strlen(ssid) > 0) {
-                    logMessage(String("ESPEasy security.dat: using SSID=") + ssid, "warn");
+                    logMessageFmt("warn", "ESPEasy security.dat: using SSID=%s", ssid);
                     saveWifiCreds(ssid, pass, ssid2 ? ssid2 : "", pass2 ? pass2 : "");
                     return true;
                 }
@@ -254,12 +254,12 @@ bool loadHwConfig(HwConfig& cfg) {
     cfg.pin5v        = DEFAULT_5V_PIN;
     for (uint8_t i = 0; i < HwConfig::GPIO_CTRL_MAX; i++) cfg.gpio_pin[i] = -1;
     cfg.gpio_count = 0;
-    cfg.intervalSec  = 60;
     cfg.teleIntervalM = DEFAULT_TELE_INTERVAL_M;
     cfg.sampleNum    = DEFAULT_SAMPLE_NUM;
     cfg.onTime       = 30;
     cfg.deepSleep    = false;
     cfg.ignoreCmd    = false;
+    cfg.narodmon     = false;
 
     JsonDocument doc;
     if (!readJson(HW_CONF_PATH, doc)) return false;
@@ -281,7 +281,6 @@ bool loadHwConfig(HwConfig& cfg) {
         cfg.gpio_mode[cfg.gpio_count][7] = '\0';
         cfg.gpio_count++;
     }
-    if (!doc["interval"].isNull())      cfg.intervalSec  = doc["interval"].as<uint16_t>();
     if (!doc["teleIntervalM"].isNull()) cfg.teleIntervalM = doc["teleIntervalM"].as<uint16_t>();
     if (!doc["sampleNum"].isNull())     cfg.sampleNum    = doc["sampleNum"].as<int8_t>();
     if (!doc["onTime"].isNull()) {
@@ -290,6 +289,7 @@ bool loadHwConfig(HwConfig& cfg) {
     }
     cfg.deepSleep   = doc["deepSleep"]   | false;
     cfg.ignoreCmd   = doc["ignoreCmd"]   | false;
+    cfg.narodmon    = doc["narodmon"]    | false;
     cfg.provisioned = doc["provisioned"] | false;
     return true;
 }
@@ -309,12 +309,12 @@ bool saveHwConfig(const HwConfig& cfg) {
         snprintf(key, sizeof(key), "gpio%d", cfg.gpio_pin[i]);
         doc[key] = cfg.gpio_mode[i];
     }
-    doc["interval"]      = cfg.intervalSec;
     doc["teleIntervalM"] = cfg.teleIntervalM;
     doc["sampleNum"]     = cfg.sampleNum;
     doc["onTime"]        = cfg.onTime;
     doc["deepSleep"]     = cfg.deepSleep;
     doc["ignoreCmd"]     = cfg.ignoreCmd;
+    doc["narodmon"]      = cfg.narodmon;
     doc["provisioned"]   = cfg.provisioned;
     return writeJson(HW_CONF_PATH, doc);
 }
@@ -323,7 +323,7 @@ bool saveHwConfig(const HwConfig& cfg) {
 
 bool loadSensorSetup() {
     if (!LittleFS.exists(SENSOR_SETUP_PATH)) {
-        logMessage("sensorsetup.json not found — using defaults (all disabled)", "info");
+        logMessage("info", "sensorsetup.json not found — using defaults (all disabled)");
         return false;
     }
     File f = LittleFS.open(SENSOR_SETUP_PATH, "r");
@@ -335,7 +335,7 @@ bool loadSensorSetup() {
         ok = !err;
     }
     f.close();
-    if (ok) logMessage("sensorsetup loaded", "info");
+    if (ok) logMessage("info", "sensorsetup loaded");
     return ok;
 }
 
@@ -348,7 +348,7 @@ bool saveSensorSetup() {
         xSemaphoreGive(sensorSetupMutex);
     }
     f.close();
-    logMessage(ok ? "sensorsetup saved" : "sensorsetup write failed", ok ? "info" : "error");
+    logMessage(ok ? "info" : "error", ok ? "sensorsetup saved" : "sensorsetup write failed");
     return ok;
 }
 

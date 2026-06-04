@@ -13,7 +13,7 @@
 #include "sensors/sensor_manager.h"
 
 #ifdef ESP8266
-ADC_MODE(ADC_VCC);  // ESP.getVcc() reads the supply rail, not TOUT pin
+//ADC_MODE(ADC_VCC);  // ESP.getVcc() reads the supply rail, not TOUT pin
 #else
 #  include "esp_system.h"
 #endif
@@ -117,9 +117,11 @@ void setup() {
         sysState.teleIntervalM = hw.teleIntervalM;
         sysState.sampleNum     = hw.sampleNum;
         sysState.onTime        = hw.onTime;
-        STATE_UNLOCK();
         // Restore ignoreCmd mode before web server starts
         setIgnoreCmdMode(hw.ignoreCmd);
+        setDeepSleepMode(hw.deepSleep);
+        setNarodmonMode(hw.narodmon);
+        STATE_UNLOCK();
     }
 
     // ── Init sensors ──
@@ -138,7 +140,7 @@ void setup() {
     loggerInit();
     webInit();
     uplinkInit();  // opens AP + starts STA attempt
-    logMessage("Ready — " FW_BUILD, "info");
+    logMessageFmt("info", "Ready — %s", FW_BUILD);
 #else
     CREATE_TASK_CORE(loggerTask, "logger", TASK_STACK_LOGGER,
                      NULL, TASK_PRIO_LOGGER, &loggerTaskHandle, 0);
@@ -153,7 +155,7 @@ void setup() {
     CREATE_TASK_CORE(webTask, "web", TASK_STACK_WEB,
                      NULL, TASK_PRIO_WEB, &webTaskHandle, 1);
 
-    logMessage("All tasks started — " FW_BUILD, "info");
+    logMessageFmt("info", "All tasks started — %s", FW_BUILD);
 #endif
 }
 
@@ -163,7 +165,7 @@ void loop() {
     loggerProcess();
     webProcess();
     uplinkProcess();
-    sensorProcess();
+    processSensorCycle();
 }
 #else
 void loop() {
